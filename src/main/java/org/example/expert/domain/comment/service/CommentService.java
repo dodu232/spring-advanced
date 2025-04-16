@@ -62,4 +62,10 @@ public class CommentService {
         }
         return dtoList;
     }
+
+    @Transactional
+    public void deleteComment(long commentId){
+        commentRepository.deleteById(commentId);
+    }
+
 }
