@@ -1,4 +1,4 @@
-package org.example.expert.config;
+package org.example.expert.global.interceptor;
 
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;

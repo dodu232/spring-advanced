@@ -1,5 +1,6 @@
-package org.example.expert.config;
+package org.example.expert.global.config;
 
+import org.example.expert.global.util.PasswordEncoder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

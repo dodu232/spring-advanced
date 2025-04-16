@@ -1,4 +1,4 @@
-package org.example.expert.config;
+package org.example.expert.domain.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
