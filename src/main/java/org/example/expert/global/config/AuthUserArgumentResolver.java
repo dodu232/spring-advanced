@@ -1,11 +1,13 @@
 package org.example.expert.global.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.expert.domain.auth.exception.AuthException;
 import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.user.enums.UserRole;
+import org.example.expert.global.exception.ApiException;
+import org.example.expert.global.exception.ErrorType;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -21,7 +23,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
         // @Auth 어노테이션과 AuthUser 타입이 함께 사용되지 않은 경우 예외 발생
         if (hasAuthAnnotation != isAuthUserType) {
-            throw new AuthException("@Auth와 AuthUser 타입은 함께 사용되어야 합니다.");
+            throw new ApiException(HttpStatus.UNAUTHORIZED, ErrorType.INVALID_PARAMETER, "@Auth와 AuthUser 타입은 함께 사용되어야 합니다.");
         }
 
         return hasAuthAnnotation;
