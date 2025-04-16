@@ -17,7 +17,7 @@ class PasswordEncoderTest {
 
     @Test
     @DisplayName("BCryptPasswordEncoder가 패스워드를 정상적으로 인코딩하고 매칭한다\"")
-    void matches_() {
+    void encode_그리고_matches_정상작동한다() {
         // given
         String rawPassword = "testPassword";
 
