@@ -10,6 +10,7 @@ import org.example.expert.domain.comment.repository.CommentRepository;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
+import org.example.expert.domain.todo.service.TodoService;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.global.exception.ApiException;
@@ -22,19 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
-    private final TodoRepository todoRepository;
+    private final TodoService todoService;
     private final CommentRepository commentRepository;
 
     @Transactional
     public CommentResponseDto.Create saveComment(AuthUser authUser, long todoId, CommentRequestDto.Create commentSaveRequest) {
         User user = User.fromAuthUser(authUser);
-        Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
-                new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
-
         Comment newComment = new Comment(
                 commentSaveRequest.getContents(),
                 user,
-                todo
+                todoService.getById(todoId)
         );
 
         Comment savedComment = commentRepository.save(newComment);

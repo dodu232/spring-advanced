@@ -82,4 +82,9 @@ public class TodoService {
                 todo.getModifiedAt()
         );
     }
+
+    public Todo getById(long todoId){
+        return todoRepository.findByIdWithUser(todoId)
+            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
+    }
 }

@@ -10,9 +10,11 @@ import org.example.expert.domain.manager.entity.Manager;
 import org.example.expert.domain.manager.repository.ManagerRepository;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
+import org.example.expert.domain.todo.service.TodoService;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.example.expert.domain.user.service.UserService;
 import org.example.expert.global.exception.ApiException;
 import org.example.expert.global.exception.ErrorType;
 import org.springframework.http.HttpStatus;
@@ -25,15 +27,14 @@ import org.springframework.util.ObjectUtils;
 public class ManagerService {
 
     private final ManagerRepository managerRepository;
-    private final UserRepository userRepository;
-    private final TodoRepository todoRepository;
+    private final UserService userService;
+    private final TodoService todoService;
 
     @Transactional
     public ManagerResponseDto.Create saveManager(AuthUser authUser, long todoId, ManagerRequestDto.Create managerSaveRequest) {
         // 일정을 만든 유저
         User user = User.fromAuthUser(authUser);
-        Todo todo = todoRepository.findById(todoId)
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
+        Todo todo = todoService.getById(todoId);
 
         if(todo.getUser() == null){
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "담당자를 등록하려고 하는 유저가 일정을 만든 유저가 유효하지 않습니다.");
@@ -43,8 +44,7 @@ public class ManagerService {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "담당자를 등록하려고 하는 유저가 일정을 만든 유저가 유효하지 않습니다.");
         }
 
-        User managerUser = userRepository.findById(managerSaveRequest.getManagerUserId())
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "등록하려고 하는 담당자 유저가 존재하지 않습니다."));
+        User managerUser = userService.getById(managerSaveRequest.getManagerUserId());
 
         if (ObjectUtils.nullSafeEquals(user.getId(), managerUser.getId())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "일정 작성자는 본인을 담당자로 등록할 수 없습니다.");
@@ -61,8 +61,7 @@ public class ManagerService {
 
     @Transactional(readOnly = true)
     public List<ManagerResponseDto.Get> getManagers(long todoId) {
-        Todo todo = todoRepository.findById(todoId)
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
+        Todo todo = todoService.getById(todoId);
 
         List<Manager> managerList = managerRepository.findByTodoIdWithUser(todo.getId());
 
@@ -79,11 +78,9 @@ public class ManagerService {
 
     @Transactional
     public void deleteManager(long userId, long todoId, long managerId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "User not found"));
+        User user = userService.getById(userId);
 
-        Todo todo = todoRepository.findById(todoId)
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
+        Todo todo = todoService.getById(todoId);
 
         if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "해당 일정을 만든 유저가 유효하지 않습니다.");
