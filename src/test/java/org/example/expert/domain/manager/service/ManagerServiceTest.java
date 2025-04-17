@@ -1,10 +1,16 @@
 package org.example.expert.domain.manager.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
+import java.util.List;
+import java.util.Optional;
 import org.example.expert.domain.common.dto.AuthUser;
-import org.example.expert.domain.common.exception.InvalidRequestException;
-import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
-import org.example.expert.domain.manager.dto.response.ManagerResponse;
-import org.example.expert.domain.manager.dto.response.ManagerSaveResponse;
+import org.example.expert.domain.manager.dto.ManagerRequestDto;
+import org.example.expert.domain.manager.dto.ManagerResponseDto;
 import org.example.expert.domain.manager.entity.Manager;
 import org.example.expert.domain.manager.repository.ManagerRepository;
 import org.example.expert.domain.todo.entity.Todo;
@@ -12,19 +18,13 @@ import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.example.expert.domain.user.repository.UserRepository;
+import org.example.expert.global.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class ManagerServiceTest {
@@ -45,7 +45,7 @@ class ManagerServiceTest {
         given(todoRepository.findById(todoId)).willReturn(Optional.empty());
 
         // when & then
-        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> managerService.getManagers(todoId));
+        ApiException exception = assertThrows(ApiException.class, () -> managerService.getManagers(todoId));
         assertEquals("Todo not found", exception.getMessage());
     }
 
@@ -59,12 +59,12 @@ class ManagerServiceTest {
         Todo todo = new Todo();
         ReflectionTestUtils.setField(todo, "user", null);
 
-        ManagerSaveRequest managerSaveRequest = new ManagerSaveRequest(managerUserId);
+        ManagerRequestDto.Create managerSaveRequest = new ManagerRequestDto.Create(managerUserId);
 
         given(todoRepository.findById(todoId)).willReturn(Optional.of(todo));
 
         // when & then
-        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () ->
+        ApiException exception = assertThrows(ApiException.class, () ->
             managerService.saveManager(authUser, todoId, managerSaveRequest)
         );
 
@@ -86,7 +86,7 @@ class ManagerServiceTest {
         given(managerRepository.findByTodoIdWithUser(todoId)).willReturn(managerList);
 
         // when
-        List<ManagerResponse> managerResponses = managerService.getManagers(todoId);
+        List<ManagerResponseDto.Get> managerResponses = managerService.getManagers(todoId);
 
         // then
         assertEquals(1, managerResponses.size());
@@ -107,14 +107,14 @@ class ManagerServiceTest {
         User managerUser = new User("b@b.com", "password", UserRole.USER);  // 매니저로 등록할 유저
         ReflectionTestUtils.setField(managerUser, "id", managerUserId);
 
-        ManagerSaveRequest managerSaveRequest = new ManagerSaveRequest(managerUserId); // request dto 생성
+        ManagerRequestDto.Create managerSaveRequest = new ManagerRequestDto.Create(managerUserId); // request dto 생성
 
         given(todoRepository.findById(todoId)).willReturn(Optional.of(todo));
         given(userRepository.findById(managerUserId)).willReturn(Optional.of(managerUser));
         given(managerRepository.save(any(Manager.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        ManagerSaveResponse response = managerService.saveManager(authUser, todoId, managerSaveRequest);
+        ManagerResponseDto.Create response = managerService.saveManager(authUser, todoId, managerSaveRequest);
 
         // then
         assertNotNull(response);

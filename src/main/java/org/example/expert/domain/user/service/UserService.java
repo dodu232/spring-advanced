@@ -19,6 +19,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
     @Transactional(readOnly = true)
     public UserResponse getUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -53,11 +58,6 @@ public class UserService {
         return userRepository.findById(userId).orElseThrow(
             () -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER,
                 "User not found"));
-    }
-
-    @Transactional
-    public User createUser(User user) {
-        return userRepository.save(user);
     }
 
     @Transactional
