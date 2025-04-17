@@ -7,6 +7,7 @@ import org.example.expert.domain.comment.dto.CommentResponseDto;
 import org.example.expert.domain.comment.service.CommentService;
 import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +25,11 @@ public class CommentController {
             @PathVariable long todoId,
             @Valid @RequestBody CommentRequestDto.Create commentSaveRequest
     ) {
-        return ResponseEntity.ok(commentService.saveComment(authUser, todoId, commentSaveRequest));
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.saveComment(authUser, todoId, commentSaveRequest));
     }
 
     @GetMapping("/todos/{todoId}/comments")
     public ResponseEntity<List<CommentResponseDto.Get>> getComments(@PathVariable long todoId) {
-        return ResponseEntity.ok(commentService.getComments(todoId));
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getComments(todoId));
     }
 }

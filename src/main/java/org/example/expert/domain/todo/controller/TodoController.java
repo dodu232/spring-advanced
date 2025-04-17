@@ -8,6 +8,7 @@ import org.example.expert.domain.todo.dto.TodoRequestDto;
 import org.example.expert.domain.todo.dto.TodoResponseDto;
 import org.example.expert.domain.todo.service.TodoService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,7 @@ public class TodoController {
             @Auth AuthUser authUser,
             @Valid @RequestBody TodoRequestDto.Create todoSaveRequest
     ) {
-        return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(todoService.saveTodo(authUser, todoSaveRequest));
     }
 
     @GetMapping("/todos")
@@ -35,11 +36,11 @@ public class TodoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size));
+        return ResponseEntity.status(HttpStatus.OK).body(todoService.getTodos(page, size));
     }
 
     @GetMapping("/todos/{todoId}")
     public ResponseEntity<TodoResponseDto.Get> getTodo(@PathVariable long todoId) {
-        return ResponseEntity.ok(todoService.getTodo(todoId));
+        return ResponseEntity.status(HttpStatus.OK).body(todoService.getTodo(todoId));
     }
 }

@@ -10,6 +10,7 @@ import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.manager.dto.ManagerRequestDto;
 import org.example.expert.domain.manager.dto.ManagerResponseDto;
 import org.example.expert.domain.manager.service.ManagerService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,16 +33,16 @@ public class ManagerController {
             @PathVariable long todoId,
             @Valid @RequestBody ManagerRequestDto.Create managerSaveRequest
     ) {
-        return ResponseEntity.ok(managerService.saveManager(authUser, todoId, managerSaveRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(managerService.saveManager(authUser, todoId, managerSaveRequest));
     }
 
     @GetMapping("/todos/{todoId}/managers")
     public ResponseEntity<List<ManagerResponseDto.Get>> getMembers(@PathVariable long todoId) {
-        return ResponseEntity.ok(managerService.getManagers(todoId));
+        return ResponseEntity.status(HttpStatus.OK).body(managerService.getManagers(todoId));
     }
 
     @DeleteMapping("/todos/{todoId}/managers/{managerId}")
-    public void deleteManager(
+    public ResponseEntity<Void> deleteManager(
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable long todoId,
             @PathVariable long managerId
@@ -49,5 +50,6 @@ public class ManagerController {
         Claims claims = jwtUtil.extractClaims(bearerToken.substring(7));
         long userId = Long.parseLong(claims.getSubject());
         managerService.deleteManager(userId, todoId, managerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
