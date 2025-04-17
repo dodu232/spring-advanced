@@ -1,10 +1,8 @@
 package org.example.expert.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.expert.domain.auth.dto.request.SigninRequest;
-import org.example.expert.domain.auth.dto.request.SignupRequest;
-import org.example.expert.domain.auth.dto.response.SigninResponse;
-import org.example.expert.domain.auth.dto.response.SignupResponse;
+import org.example.expert.domain.auth.dto.AuthRequestDto;
+import org.example.expert.domain.auth.dto.AuthResponseDto;
 import org.example.expert.domain.auth.jwt.JwtUtil;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
@@ -25,7 +23,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public SignupResponse signup(SignupRequest signupRequest) {
+    public AuthResponseDto.Signup signup(AuthRequestDto.Signup signupRequest) {
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "이미 존재하는 이메일입니다.");
@@ -44,11 +42,11 @@ public class AuthService {
 
         String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
 
-        return new SignupResponse(bearerToken);
+        return new AuthResponseDto.Signup(bearerToken);
     }
 
     @Transactional(readOnly = true)
-    public SigninResponse signin(SigninRequest signinRequest) {
+    public AuthResponseDto.Signin signin(AuthRequestDto.Signin signinRequest) {
         User user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(
                 () -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "가입되지 않은 유저입니다."));
 
@@ -59,6 +57,6 @@ public class AuthService {
 
         String bearerToken = jwtUtil.createToken(user.getId(), user.getEmail(), user.getUserRole());
 
-        return new SigninResponse(bearerToken);
+        return new AuthResponseDto.Signin(bearerToken);
     }
 }

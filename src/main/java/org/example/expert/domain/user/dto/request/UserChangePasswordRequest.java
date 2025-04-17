@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.expert.domain.common.exception.InvalidRequestException;
 
 @Getter
 @NoArgsConstructor

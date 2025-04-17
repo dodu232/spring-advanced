@@ -3,9 +3,8 @@ package org.example.expert.domain.comment.service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.expert.domain.comment.dto.request.CommentSaveRequest;
-import org.example.expert.domain.comment.dto.response.CommentResponse;
-import org.example.expert.domain.comment.dto.response.CommentSaveResponse;
+import org.example.expert.domain.comment.dto.CommentRequestDto;
+import org.example.expert.domain.comment.dto.CommentResponseDto;
 import org.example.expert.domain.comment.entity.Comment;
 import org.example.expert.domain.comment.repository.CommentRepository;
 import org.example.expert.domain.common.dto.AuthUser;
@@ -27,7 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
+    public CommentResponseDto.Create saveComment(AuthUser authUser, long todoId, CommentRequestDto.Create commentSaveRequest) {
         User user = User.fromAuthUser(authUser);
         Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
                 new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
@@ -40,7 +39,7 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(newComment);
 
-        return new CommentSaveResponse(
+        return new CommentResponseDto.Create(
                 savedComment.getId(),
                 savedComment.getContents(),
                 new UserResponse(user.getId(), user.getEmail())
@@ -48,13 +47,13 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getComments(long todoId) {
+    public List<CommentResponseDto.Get> getComments(long todoId) {
         List<Comment> commentList = commentRepository.findByTodoIdWithUser(todoId);
 
-        List<CommentResponse> dtoList = new ArrayList<>();
+        List<CommentResponseDto.Get> dtoList = new ArrayList<>();
         for (Comment comment : commentList) {
             User user = comment.getUser();
-            CommentResponse dto = new CommentResponse(
+            CommentResponseDto.Get dto = new CommentResponseDto.Get(
                     comment.getId(),
                     comment.getContents(),
                     new UserResponse(user.getId(), user.getEmail())

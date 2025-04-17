@@ -3,9 +3,8 @@ package org.example.expert.domain.todo.service;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
 import org.example.expert.domain.common.dto.AuthUser;
-import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
-import org.example.expert.domain.todo.dto.response.TodoResponse;
-import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.TodoRequestDto;
+import org.example.expert.domain.todo.dto.TodoResponseDto;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
@@ -29,7 +28,7 @@ public class TodoService {
     private final WeatherClient weatherClient;
 
     @Transactional
-    public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
+    public TodoResponseDto.Create saveTodo(AuthUser authUser, TodoRequestDto.Create todoSaveRequest) {
         User user = User.fromAuthUser(authUser);
 
         String weather = weatherClient.getTodayWeather();
@@ -42,7 +41,7 @@ public class TodoService {
         );
         Todo savedTodo = todoRepository.save(newTodo);
 
-        return new TodoSaveResponse(
+        return new TodoResponseDto.Create(
                 savedTodo.getId(),
                 savedTodo.getTitle(),
                 savedTodo.getContents(),
@@ -51,12 +50,12 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponseDto.Get> getTodos(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("modifiedAt").descending());
 
         Page<Todo> todos = todoRepository.findAll(pageable);
 
-        return todos.map(todo -> new TodoResponse(
+        return todos.map(todo -> new TodoResponseDto.Get(
                 todo.getId(),
                 todo.getTitle(),
                 todo.getContents(),
@@ -67,13 +66,13 @@ public class TodoService {
         ));
     }
 
-    public TodoResponse getTodo(long todoId) {
+    public TodoResponseDto.Get getTodo(long todoId) {
         Todo todo = todoRepository.findByIdWithUser(todoId)
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, ErrorType.INVALID_PARAMETER, "Todo not found"));
 
         User user = todo.getUser();
 
-        return new TodoResponse(
+        return new TodoResponseDto.Get(
                 todo.getId(),
                 todo.getTitle(),
                 todo.getContents(),
